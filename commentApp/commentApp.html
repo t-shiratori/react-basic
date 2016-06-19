@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>comment app</title>
+    <link rel="stylesheet" href="./index.css">
+  </head>
+  <body>
+
+    <div id="output"></div>
+
+    <script src="../lib/ver15/react.js"></script>
+    <script src="../lib/ver15/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.24/browser.min.js"></script>
+    <script type="text/babel">
+
+      /*-- リストのコンポーネントを定義
+      ----------------------------------------------------------------------------*/
+      var CommentList = React.createClass({
+        render : function(){
+          //commentsが送られてくるデータである
+          var commentsNode = this.props.comments.map(function(comment,index){
+            return (
+              <li className="comment__list" key={index}>{comment}</li>
+            );
+          });
+          return (<ul className="comment__lists">{commentsNode}</ul>);
+        }
+      });
+
+      /*-- コメントアプリのコンポーネントを定義
+      ----------------------------------------------------------------------------*/
+      var CommentApp = React.createClass({
+        getInitialState : function(){
+          return {
+            commentNew:"",
+            commentSend:"",
+            commentHas:[]
+          };
+        },
+        handleChange : function(e){
+          /*
+          * onChangeで呼び出される。this.setStateでプロパティを更新。
+          */
+          e.preventDefault();
+          this.setState(
+            {commentNew : e.target.value}
+          );
+          return;
+        },
+        handleSubmit :function(e){
+          /*
+          * onSubmitで呼び出される。this.setStateでプロパティを更新。
+          * commentHasプロパティを更新すると、<CommentList comments = {this.state.commentHas}/>が更新されるので、
+          * CommentListコンポーネントが再描画される。
+          * reactのコンポーネントはプロパティが更新されるとrenderが走って再描画される仕組みなっている。
+          * その際、仮想DOMの仕組みによって差分のDOMだけが書き換えられる。
+          */
+           e.preventDefault();
+           var c = this.state.commentNew
+           if(!c){
+             alert("入力してください！");
+             return false;
+           }
+           var cHas = this.state.commentHas;
+           cHas.push(c);
+           this.setState(
+             {
+               commentSend : c,
+               commentNew : "",
+               commentHas : cHas
+             }
+           );
+           return;
+        },
+        render : function(){
+          return (
+            <div className = "commentApp">
+              <form className="commentApp__form" onSubmit={this.handleSubmit}>
+                <input className="commentApp__input" onChange={this.handleChange} type="text" value={this.state.commentNew} />
+                <button className="btnAdd">add</button>
+              </form>
+              <div className="statusBox">
+                <p className="cell textMirror">文字数： {this.state.commentNew.length}</p>
+                <p className="cell totalNum">コメント合計： {this.state.commentHas.length}</p>
+              </div>
+              {/* CommentListコンポーネントを読み込む */}
+              <CommentList comments = {this.state.commentHas}/>
+            </div>
+          );
+        }
+      });
+
+      /*-- レンダリング
+      ----------------------------------------------------------------------------*/
+      ReactDOM.render(<CommentApp />,document.getElementById('output'));
+
+    </script>
+
+
+
+  </body>
+</html>
